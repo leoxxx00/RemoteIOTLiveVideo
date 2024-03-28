@@ -1,7 +1,17 @@
-from flask import Flask, Response
+from flask import Flask, Response, render_template, request
 import cv2
+import RPi.GPIO as GPIO
 
 app = Flask(__name__)
+
+# Set up GPIO
+RELAY_PIN = 18
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(RELAY_PIN, GPIO.OUT)
+
+# Function to toggle the relay
+def toggle_relay(state):
+    GPIO.output(RELAY_PIN, state)
 
 # Function to capture video from the camera
 def generate_frames():
@@ -47,9 +57,23 @@ def index():
     <body>
         <h1>IoT Camera Stream</h1>
         <img src="/video_feed" width="320" height="240">
+        <form id="relayForm" action="/toggle_relay" method="post">
+            <button type="submit" name="action" value="on">Turn On Relay</button>
+            <button type="submit" name="action" value="off">Turn Off Relay</button>
+        </form>
     </body>
     </html>
     """
 
+# Route to handle button press
+@app.route('/toggle_relay', methods=['POST'])
+def toggle_relay_route():
+    if request.form['action'] == 'on':
+        toggle_relay(GPIO.HIGH)
+    elif request.form['action'] == 'off':
+        toggle_relay(GPIO.LOW)
+    return '', 204
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
+
