@@ -1,6 +1,7 @@
-from flask import Flask, Response, render_template, request
+from flask import Flask, Response, request
 import cv2
 import RPi.GPIO as GPIO
+import time
 
 app = Flask(__name__)
 
@@ -47,22 +48,91 @@ def video_feed():
 @app.route('/')
 def index():
     return """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>IoT Camera Stream</title>
-    </head>
-    <body>
-        <h1>IoT Camera Stream</h1>
-        <img src="/video_feed" width="320" height="240">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Camera Stream</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #009688;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #stream-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #video-stream {
+            width: 320px;
+            height: 240px;
+            border: 2px solid #009688;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #009688;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+
+        button:hover {
+            background-color: #00796b;
+        }
+
+        #time {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+    <script>
+        function updateTime() {
+            var now = new Date();
+            document.getElementById('time').innerHTML = now.toLocaleString();
+        }
+
+        setInterval(updateTime, 1000); // Update time every second
+    </script>
+</head>
+<body>
+    <h1>IoT Camera Stream</h1>
+    <div id="stream-container">
+        <img id="video-stream" src="/video_feed" alt="Video Stream">
+    </div>
+    <div id="button-container">
         <form id="relayForm" action="/toggle_relay" method="post">
             <button type="submit" name="action" value="on">Turn On Relay</button>
             <button type="submit" name="action" value="off">Turn Off Relay</button>
         </form>
-    </body>
-    </html>
+    </div>
+    <div id="time">Fetching time...</div>
+</body>
+</html>
+
     """
 
 # Route to handle button press
