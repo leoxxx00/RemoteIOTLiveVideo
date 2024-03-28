@@ -56,15 +56,15 @@ def index():
     <title>IoT Camera Stream</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #000;
+            color: #0f0;
             margin: 0;
             padding: 0;
         }
 
         h1 {
-            color: #009688;
+            color: #0f0;
             text-align: center;
             margin-top: 20px;
         }
@@ -77,7 +77,7 @@ def index():
         #video-stream {
             width: 320px;
             height: 240px;
-            border: 2px solid #009688;
+            border: 2px solid #0f0;
             border-radius: 5px;
             display: block;
             margin: 0 auto;
@@ -89,8 +89,8 @@ def index():
         }
 
         button {
-            background-color: #009688;
-            color: white;
+            background-color: #0f0;
+            color: #000;
             border: none;
             border-radius: 5px;
             padding: 10px 20px;
@@ -100,13 +100,14 @@ def index():
         }
 
         button:hover {
-            background-color: #00796b;
+            background-color: #080;
         }
 
         #time {
             text-align: center;
             margin-top: 20px;
             font-size: 18px;
+            color: #0f0;
         }
     </style>
     <script>
