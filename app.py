@@ -1,15 +1,38 @@
 from flask import Flask, render_template_string, Response, redirect, url_for
 from gpiozero import LED
 import cv2
+import threading
 
 # Flask setup
 app = Flask(__name__)
 
-# Initialize Relay on GPIO18 (was GPIO17 before)
+# Initialize Relay on GPIO18
 relay = LED(18)
 
-# Use 0 for USB webcam or adjust for Pi Camera
+# Use 0 for USB webcam or change as needed
 camera = cv2.VideoCapture(0)
+
+# Set lower resolution for performance
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+
+# Shared frame storage and lock
+lock = threading.Lock()
+current_frame = None
+
+# Background thread to continuously read frames
+def capture_frames():
+    global current_frame
+    while True:
+        success, frame = camera.read()
+        if not success:
+            continue
+        with lock:
+            current_frame = frame
+
+# Start the background frame capture thread
+t = threading.Thread(target=capture_frames, daemon=True)
+t.start()
 
 # HTML Template (Inline)
 html_template = """
@@ -37,15 +60,15 @@ html_template = """
 
 # Video stream generator
 def generate_frames():
+    global current_frame
     while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            _, buffer = cv2.imencode('.jpg', frame)
+        with lock:
+            if current_frame is None:
+                continue
+            _, buffer = cv2.imencode('.jpg', current_frame)
             frame_bytes = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
 @app.route('/')
 def index():
@@ -69,4 +92,3 @@ def video_feed():
 # Run the app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=False)
-
